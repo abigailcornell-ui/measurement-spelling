@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matter & Measurement Spelling Sprint</title>
+    <!-- Tailwind CSS for rapid modern layout styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .pulse-subtle {
+            animation: pulse-subtle 2s infinite;
+        }
+
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        .shake-err {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between p-4 sm:p-6 transition-colors duration-300">
+
+    <header class="max-w-xl w-full mx-auto flex justify-between items-center py-2 px-1">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl">⚖️</span>
+            <h1 class="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">Physical Science Sprint</h1>
+        </div>
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+            <span id="themeIcon">🌙</span>
+        </button>
+    </header>
+
+    <main class="max-w-xl w-full mx-auto my-auto py-4">
+        <div id="gameCard" class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-700/80 p-6 sm:p-8 transition-all">
+            
+            <!-- Dashboard Stats -->
+            <div class="grid grid-cols-3 gap-3 mb-4 text-center bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                <div class="flex flex-col">
+                    <span class="text-xs uppercase font-semibold text-slate-400 dark:text-slate-500">Progress</span>
+                    <span class="text-sm sm:text-base font-extrabold text-slate-700 dark:text-slate-200">📍 <span id="wordIndexDisplay">1</span>/10</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs uppercase font-semibold text-slate-400 dark:text-slate-500">Timer</span>
+                    <span class="text-sm sm:text-base font-extrabold text-brand-600 dark:text-brand-500">⏱️ <span id="timerDisplay">0:00</span></span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs uppercase font-semibold text-slate-400 dark:text-slate-500">Score</span>
+                    <span class="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400">⭐ <span id="scoreDisplay">0</span></span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full mb-6 overflow-hidden">
+                <div id="progressBar" class="bg-brand-500 h-full w-0 transition-all duration-500 ease-out"></div>
+            </div>
+
+            <!-- Audio Buttons -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="speakWord()" class="flex items-center justify-center space-x-2 py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-500/20 active:scale-95 transition-all">
+                    <span>🔊</span>
+                    <span>Hear Word</span>
+                </button>
+                <button onclick="speakSentence()" class="flex items-center justify-center space-x-2 py-3 px-4 bg-slate-700 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-semibold rounded-xl shadow-md active:scale-95 transition-all">
+                    <span>📖</span>
+                    <span>Definition</span>
+                </button>
+            </div>
+
+            <!-- Input & Hint Form -->
+            <div id="formContainer" class="space-y-4">
+                <div class="relative">
+                    <input type="text" id="userInput" placeholder="Type answer here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                        class="w-full px-4 py-3.5 text-center text-lg sm:text-xl font-medium rounded-xl border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-900 focus:border-brand-500 dark:focus:border-brand-500 focus:outline-none transition-all shadow-inner">
+                </div>
+
+                <div id="hintBox" class="min-h-[2.5rem] flex items-center justify-center text-center px-3 py-1">
+                    <p id="hintText" class="text-sm text-slate-500 dark:text-slate-400 italic font-medium"></p>
+                </div>
+
+                <button id="actionBtn" onclick="handleAction()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all">
+                    Check Answer
+                </button>
+            </div>
+
+            <!-- Feedback Message -->
+            <div id="feedbackBox" class="mt-4 text-center font-bold text-base min-h-[1.5rem] transition-all"></div>
+
+            <!-- Review / Trouble List -->
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/60 text-xs text-slate-500 dark:text-slate-400">
+                <span class="font-semibold text-slate-600 dark:text-slate-300">Words to Review:</span>
+                <span id="reviewList" class="ml-1 text-rose-500 dark:text-rose-400 font-medium">None yet!</span>
+            </div>
+        </div>
+    </main>
+
+    <footer class="max-w-xl w-full mx-auto text-center text-xs text-slate-400 dark:text-slate-500 py-3">
+        Physical Science Spelling Unit • Matter & Measurement
+    </footer>
+
+    <script>
+        // Word List Array
+        const rawWords = [
+            { word: "Matter", sentence: "Matter is anything that has mass and takes up space.", hint: "Hint: Anything that has mass and volume." },
+            { word: "Mass", sentence: "Mass is the amount of matter in an object.", hint: "Hint: Measured in grams or kilograms." },
+            { word: "Volume", sentence: "Volume is the amount of space an object takes up.", hint: "Hint: Measured in liters or cubic centimeters." },
+            { word: "Density", sentence: "Density is the measure of mass per unit volume.", hint: "Hint: Mass divided by volume (d = m/v)." },
+            { word: "International System of Measurement", sentence: "The International System of Measurement is the modern metric system used worldwide.", hint: "Hint: Also known as SI units." },
+            { word: "Meter", sentence: "The meter is the basic unit of length in the metric system.", hint: "Hint: Standard metric unit for distance." },
+            { word: "Kilogram", sentence: "The kilogram is the base unit of mass in the metric system.", hint: "Hint: Standard unit equal to 1,000 grams." },
+            { word: "Cubic centimeter", sentence: "A cubic centimeter is a metric unit of volume equal to one milliliter.", hint: "Hint: Unit of volume for solids (cm³)." },
+            { word: "Balance Scale", sentence: "A balance scale is an instrument used to measure the mass of an object.", hint: "Hint: Tool used to compare masses." },
+            { word: "Graduated Cylinder", sentence: "A graduated cylinder is a tall container used to measure liquid volume accurately.", hint: "Hint: Lab tool used for liquid volume." }
+        ];
+
+        // App State Variables
+        let wordList = [];
+        let currentIndex = 0;
+        let score = 0;
+        let seconds = 0;
+        let timerInterval = null;
+        let isWaitingForNext = false;
+        let troubleWords = [];
+
+        // Elements
+        const userInput = document.getElementById('userInput');
+        const feedbackBox = document.getElementById('feedbackBox');
+        const hintText = document.getElementById('hintText');
+        const actionBtn = document.getElementById('actionBtn');
+        const wordIndexDisplay = document.getElementById('wordIndexDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const reviewList = document.getElementById('reviewList');
+
+        window.onload = () => {
+            initGame();
+            userInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleAction();
+            });
+        };
+
+        function initGame() {
+            // Shuffle array using Fisher-Yates
+            wordList = [...rawWords].sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            score = 0;
+            seconds = 0;
+            troubleWords = [];
+            isWaitingForNext = false;
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+
+            updateUI();
+        }
+
+        function speak(text) {
+            startTimer();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.85; // Slightly slower speed for phonetic clarity
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speakWord() {
+            speak(wordList[currentIndex].word);
+            userInput.focus();
+        }
+
+        function speakSentence() {
+            speak(wordList[currentIndex].sentence);
+            userInput.focus();
+        }
+
+        function startTimer() {
+            if (!timerInterval) {
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    timerDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                }, 1000);
+            }
+        }
+
+        function handleAction() {
+            if (isWaitingForNext) {
+                nextWord();
+            } else {
+                checkSpelling();
+            }
+        }
+
+        function checkSpelling() {
+            startTimer();
+            const inputVal = userInput.value.trim();
+            const targetWord = wordList[currentIndex].word;
+
+            if (!inputVal) return;
+
+            // Flexible Case-Insensitive Matching
+            if (inputVal.toLowerCase() === targetWord.toLowerCase()) {
+                // Correct Answer
+                score++;
+                scoreDisplay.innerText = score;
+                feedbackBox.className = "mt-4 text-center font-bold text-base text-emerald-600 dark:text-emerald-400";
+                feedbackBox.innerText = "✨ Excellent! Correct Spelling!";
+                
+                actionBtn.innerText = "Next Word →";
+                actionBtn.className = "w-full py-4 bg-brand-600 hover:bg-brand-700 text-white text-lg font-bold rounded-xl shadow-lg shadow-brand-600/20 active:scale-[0.98] transition-all";
+                isWaitingForNext = true;
+            } else {
+                // Incorrect Answer
+                feedbackBox.className = "mt-4 text-center font-bold text-base text-rose-500 dark:text-rose-400 shake-err";
+                feedbackBox.innerText = "❌ Not quite right. Review the hint!";
+                hintText.innerText = wordList[currentIndex].hint;
+
+                if (!troubleWords.includes(targetWord)) {
+                    troubleWords.push(targetWord);
+                    reviewList.innerText = troubleWords.join(", ");
+                }
+            }
+        }
+
+        function nextWord() {
+            currentIndex++;
+            if (currentIndex < wordList.length) {
+                isWaitingForNext = false;
+                userInput.value = "";
+                feedbackBox.innerText = "";
+                hintText.innerText = "";
+                actionBtn.innerText = "Check Answer";
+                actionBtn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all";
+                updateUI();
+                userInput.focus();
+            } else {
+                showCompletionScreen();
+            }
+        }
+
+        function updateUI() {
+            wordIndexDisplay.innerText = currentIndex + 1;
+            const progressPercent = (currentIndex / wordList.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+        }
+
+        function showCompletionScreen() {
+            if (timerInterval) clearInterval(timerInterval);
+            const finalTime = timerDisplay.innerText;
+            progressBar.style.width = "100%";
+
+            let badge = "🔬 Lab Assistant";
+            let emoji = "🧪";
+            if (score === 10) {
+                badge = "Master Physicist";
+                emoji = "🏆";
+            } else if (score >= 7) {
+                badge = "Measurement Specialist";
+                emoji = "⚖️";
+            }
+
+            const gameCard = document.getElementById('gameCard');
+            gameCard.innerHTML = `
+                <div class="text-center py-4 space-y-4">
+                    <div class="text-6xl animate-bounce">${emoji}</div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">${badge}</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">You completed the Matter & Measurement Sprint!</p>
+
+                    <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-800 my-4">
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase font-semibold text-slate-400">Final Score</span>
+                            <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">${score}/10</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase font-semibold text-slate-400">Total Time</span>
+                            <span class="text-2xl font-black text-brand-600 dark:text-brand-400">${finalTime}</span>
+                        </div>
+                    </div>
+
+                    ${troubleWords.length > 0 ? `
+                        <div class="p-3 bg-rose-50 dark:bg-rose-950/30 rounded-xl border border-rose-100 dark:border-rose-900/40 text-left text-xs">
+                            <span class="font-bold text-rose-600 dark:text-rose-400 block mb-1">Words to Review:</span>
+                            <p class="text-slate-600 dark:text-slate-300 font-medium">${troubleWords.join(", ")}</p>
+                        </div>
+                    ` : `
+                        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/40 text-center text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                            🎉 Perfect score! No misspellings recorded!
+                        </div>
+                    `}
+
+                    <button onclick="location.reload()" class="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-all">
+                        🔄 Restart & Shuffle Words
+                    </button>
+                </div>
+            `;
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                themeIcon.innerText = '🌙';
+            } else {
+                html.classList.add('dark');
+                themeIcon.innerText = '☀️';
+            }
+        }
+    </script>
+</body>
+</html>
